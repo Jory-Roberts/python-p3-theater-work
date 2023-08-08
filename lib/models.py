@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Column, Integer, String, MetaData
+from sqlalchemy import ForeignKey, Column, Integer, String, Boolean, MetaData
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
@@ -20,7 +20,7 @@ class Audition(Base):
     actor = Column(String())
     location = Column(String())
     phone = Column(Integer())
-    hired = Column(Integer())
+    hired = Column(Boolean())
     role_id = Column(Integer(), ForeignKey("roles.id"))
 
     def __repr__(self):

@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Audition, Role
 from faker import Faker
+from random import choice as rc
 import random
 
 engine = create_engine("sqlite:///theater.db")
@@ -18,30 +19,46 @@ def delete_records():
 
 
 def create_auditions():
-    roles = create_roles()
     auditions = []
     for i in range(10):
         audition = Audition(
             actor=fake.name(),
             location=fake.city(),
             phone=fake.phone_number(),
-            hired=int(random.choice([True, False])),
-            role=random.choice(roles),
+            hired=fake.boolean(chance_of_getting_true=50),
         )
+
         session.add(audition)
+        session.commit()
         auditions.append(audition)
-    session.commit()
+
     return auditions
 
 
 def create_roles():
-    roles = [Role(character_name=fake.name()) for _ in range(5)]
-    session.add_all(roles)
-    session.commit()
+    roles = []
+    for i in range(5):
+        role = Role(character_name=fake.name())
+
+        session.add(role)
+        session.commit()
+        roles.append(role)
+
     return roles
+
+
+def relate_one_to_many(auditions, roles):
+    for audition in auditions:
+        audition.role = rc(roles)
+
+    session.add_all(auditions)
+    session.commit()
+
+    return auditions, roles
 
 
 if __name__ == "__main__":
     delete_records()
-    create_auditions()
-    create_roles()
+    auditions = create_auditions()
+    roles = create_roles()
+    auditions, roles = relate_one_to_many(auditions, roles)
